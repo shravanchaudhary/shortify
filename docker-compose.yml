@@ -1,0 +1,30 @@
+version: '3.5'
+services:
+  compressor:
+    build: ./compressor
+    ports:
+      - "5001:5000"
+    volumes:
+      - ./compressor:/usr/src/app
+    links:
+      - db
+  retriever:
+    build: ./retriever
+    ports:
+      - "5002:5000"
+    volumes:
+      - ./retriever:/usr/src/app
+    links:
+      - db
+  stats:
+    build: ./stats
+    ports:
+      - "5003:5000"
+    volumes:
+      - ./stats:/usr/src/app
+    links:
+      - db
+  db:
+    image: mongo:3.0.2
+    ports:
+      - 27017:27017
