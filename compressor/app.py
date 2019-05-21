@@ -68,6 +68,9 @@ def tinyjson():
     url = request.json['url']
     return short_insert(url)
 
+@app.route('/token/<path:varargs>')
+def api(varargs=None):
+    return varargs
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)

@@ -51,8 +51,8 @@ def decode(tiny):
 # db.urls.drop_index("createdAt_1")
 # db.urls.create_index("createdAt", expireAfterSeconds=20)  
 # print(db.urls.index_information())
-@app.route('/<tiny>')
-def todo(tiny):
+
+def expand_retrieve(tiny):
     object_id = ObjectId(decode(tiny))
     url = db.url.find_one({"_id": object_id})
     db.url.update_one({
@@ -67,6 +67,19 @@ def todo(tiny):
     url = url['url']
     if not url.startswith('https://'):
         url = 'https://' + url
+    return url
+
+@app.route('/<tiny>/<path:varargs>')
+def tokes(tiny, varargs=None):
+    url = expand_retrieve(tiny)
+    for token in varargs.split('/'):
+        url = url.replace('<%token%>',token,1)
+    return url
+
+
+@app.route('/<tiny>')
+def todo(tiny):
+    url = expand_retrieve(tiny)
     return redirect(url)
     
 if __name__ == "__main__":
