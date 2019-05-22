@@ -52,11 +52,16 @@ def decode(tiny):
 # db.urls.drop_index("createdAt_1")
 # db.urls.create_index("createdAt", expireAfterSeconds=20)  
 # print(db.urls.index_information())
-@app.route('/clicks/<tiny>')
+@app.route('/<tiny>')
 def todo(tiny):
     object_id = ObjectId(decode(tiny))
     url = url_coll.find_one({"_id": object_id})
-    return str(url['clicks'])
+    if url == None:
+        return "Url not found"
+    return jsonify({
+        'url': url['url'],
+        'clicks': str(url['clicks'])
+        })
     
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)

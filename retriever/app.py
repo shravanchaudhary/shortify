@@ -56,11 +56,14 @@ def decode(tiny):
 def expand_retrieve(tiny):
     object_id = ObjectId(decode(tiny))
     url = url_coll.find_one({"_id": object_id})
+    if url == None:
+        return None
     url_coll.update_one({
         '_id':object_id
         },{
         '$set':{
-            'clicks': int(url['clicks']) + 1
+            'clicks': int(url['clicks']) + 1,
+            'createdAt': datetime.now()
             }
         },
         upsert=True)
@@ -74,14 +77,18 @@ def expand_retrieve(tiny):
 @app.route('/<tiny>/<path:varargs>')
 def tokes(tiny, varargs=None):
     url = expand_retrieve(tiny)
+    if url == None:
+        return "Url not found"
     for token in varargs.split('/'):
         url = url.replace('<%token%>',token,1)
-    return url
+    return redirect(url)
 
 
 @app.route('/<tiny>')
 def todo(tiny):
     url = expand_retrieve(tiny)
+    if url == None:
+        return "Url not found"
     return redirect(url)
     
 if __name__ == "__main__":

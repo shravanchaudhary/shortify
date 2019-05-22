@@ -1,5 +1,5 @@
 import os
-from flask import Flask, redirect, request
+from flask import Flask, redirect, request, jsonify
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from datetime import datetime
@@ -49,8 +49,8 @@ def decode(tiny):
     return tobase(dec, 16)
 
 # Created expiration time for 60 seconds for testing purpose
-# db.urls.drop_index("createdAt_1")
-url_coll.ensure_index("createdAt", expireAfterSeconds=60)  
+db.urls.drop_index("createdAt_1")
+url_coll.ensure_index("createdAt", expireAfterSeconds=15)  
 # print(db.urls.index_information())
 
 def short_insert(url):
@@ -59,10 +59,19 @@ def short_insert(url):
         'createdAt': datetime.now(),
         'clicks': 0
     }) 
-    return 'http://localhost:5002/'+encode(str(tiny.inserted_id))
+    encoded_url = encode(str(tiny.inserted_id))
+    return jsonify({
+    	'short_url': 'http://localhost:5002/'+encoded_url,
+    	'stats': 'http://localhost:5003/'+encoded_url
+    	})
 
-@app.route('/tiny/<url>')
+@app.route('/<url>')
 def tiny(url):
+    return short_insert(url)
+
+@app.route('/', methods=['POST'])
+def tinyjson():
+    url = request.json['url']
     return short_insert(url)
 
 @app.route('/settings/expiry/<seconds>')
@@ -71,10 +80,6 @@ def set_expiry_time(seconds):
 	url_coll.ensure_index("createdAt", expireAfterSeconds=int(seconds))
 	return 'updated expiry time'  
 
-@app.route('/tiny', methods=['POST'])
-def tinyjson():
-    url = request.json['url']
-    return short_insert(url)
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)
