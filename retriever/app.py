@@ -6,7 +6,8 @@ from datetime import datetime
 
 app = Flask(__name__)
 client = MongoClient('mongodb://db:27017/')
-db = client.urls
+db = client['shortify']
+url_coll = db['urls']
 
 base = {}
 rbase = {}
@@ -54,8 +55,8 @@ def decode(tiny):
 
 def expand_retrieve(tiny):
     object_id = ObjectId(decode(tiny))
-    url = db.url.find_one({"_id": object_id})
-    db.url.update_one({
+    url = url_coll.find_one({"_id": object_id})
+    url_coll.update_one({
         '_id':object_id
         },{
         '$set':{
@@ -68,6 +69,7 @@ def expand_retrieve(tiny):
     if not url.startswith('https://'):
         url = 'https://' + url
     return url
+
 
 @app.route('/<tiny>/<path:varargs>')
 def tokes(tiny, varargs=None):

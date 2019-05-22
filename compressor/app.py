@@ -6,7 +6,8 @@ from datetime import datetime
 
 app = Flask(__name__)
 client = MongoClient('mongodb://db:27017/')
-db = client.urls
+db = client['shortify']
+url_coll = db['urls']
 
 base = {}
 rbase = {}
@@ -47,12 +48,13 @@ def decode(tiny):
     dec = todec(tiny, 64)
     return tobase(dec, 16)
 
+# Created expiration time for 60 seconds for testing purpose
 # db.urls.drop_index("createdAt_1")
-# db.urls.create_index("createdAt", expireAfterSeconds=20)  
+url_coll.ensure_index("createdAt", expireAfterSeconds=60)  
 # print(db.urls.index_information())
 
 def short_insert(url):
-    tiny = db.url.insert_one({
+    tiny = url_coll.insert_one({
         'url': url,
         'createdAt': datetime.now(),
         'clicks': 0
@@ -63,14 +65,16 @@ def short_insert(url):
 def tiny(url):
     return short_insert(url)
 
+@app.route('/settings/expiry/<seconds>')
+def set_expiry_time(seconds):
+	url_coll.drop_index("createdAt_1")
+	url_coll.ensure_index("createdAt", expireAfterSeconds=int(seconds))
+	return 'updated expiry time'  
+
 @app.route('/tiny', methods=['POST'])
 def tinyjson():
     url = request.json['url']
     return short_insert(url)
-
-@app.route('/token/<path:varargs>')
-def api(varargs=None):
-    return varargs
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)

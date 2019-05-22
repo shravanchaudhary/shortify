@@ -6,7 +6,8 @@ from datetime import datetime
 
 app = Flask(__name__)
 client = MongoClient('mongodb://db:27017/')
-db = client.urls
+db = client['shortify']
+url_coll = db['urls']
 
 base = {}
 rbase = {}
@@ -54,7 +55,7 @@ def decode(tiny):
 @app.route('/clicks/<tiny>')
 def todo(tiny):
     object_id = ObjectId(decode(tiny))
-    url = db.url.find_one({"_id": object_id})
+    url = url_coll.find_one({"_id": object_id})
     return str(url['clicks'])
     
 if __name__ == "__main__":
