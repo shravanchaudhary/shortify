@@ -1,17 +1,23 @@
-Link Shortner (Python 3.7)
+# Link Shortner
 
 Shortens the link provided.
 
+## Requirements
+
+Python 3.x
+
+## How to run this project:
+
 To run, cd to project directory, then hit "docker-compose up" command, it will run the whole project exposed to localhost:5000
 
-To shorten a link:
+## To shorten a link:
 	1. Pass your link in the url followed by base url (localhost:5000/<your_url>)
 	2. It returns two urls in json,
 		a. The shortened link of your url
 		b. A link to see the stats (no. of clicks) on your shortened link.
 	Note: Shortened link dies within stipulated period of time (currently 60 seconds) if there are no clicks on the link.
 
-Implementation of token assistance in link shortening is in following way:
+## Implementation of token assistance in link shortening is in following way:
 	1. Post json with following format  
 	{
 		"url" : "the_url_to_be_shortened_with_all_token_holders_as_<%token%>"
@@ -21,6 +27,6 @@ Implementation of token assistance in link shortening is in following way:
 		https://shortened-link/token1/token2/token3...
 	Entering inconsistent number of tokens would lead to wrong url generation
 	
-Technologies used:
+## Technologies used:
 	MongoDB
 	Flask
